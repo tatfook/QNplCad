@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Class:	MyApp 
+// Class:	ParaEngineApp 
 // Authors:	LiXizhi
 // Emails:	LiXizhi@yeah.net
 // Company: ParaEngine Co.
@@ -16,25 +16,24 @@
 #include "NPLInterface.hpp"
 #include "PluginLoader.hpp"
 
-#include "MyApp.h"
+#include "ParaEngineApp.h"
 
 using namespace ParaEngine;
 using namespace NPL;
-using namespace MyCompany;
 
-MyCompany::CMyApp::CMyApp(HINSTANCE hInst /*= NULL*/) : m_pParaEngine(NULL), m_pParaEngineApp(NULL), m_hInst(hInst)
+ParaEngineApp::ParaEngineApp(HINSTANCE hInst /*= NULL*/) : m_pParaEngine(NULL), m_pParaEngineApp(NULL), m_hInst(hInst)
 {
 
 }
 
-MyCompany::CMyApp::~CMyApp()
+ParaEngineApp::~ParaEngineApp()
 {
 	if (m_pParaEngineApp){
 		m_pParaEngineApp->StopApp();
 	}
 }
 
-bool MyCompany::CMyApp::CheckLoad()
+bool ParaEngineApp::CheckLoad()
 {
 	if (m_ParaEngine_plugin.IsValid())
 	{
@@ -63,7 +62,7 @@ bool MyCompany::CMyApp::CheckLoad()
 	return m_ParaEngine_plugin.IsValid();
 }
 
-int MyCompany::CMyApp::Run(HINSTANCE hInst, const char* lpCmdLine)
+int ParaEngineApp::Run(HINSTANCE hInst, const char* lpCmdLine)
 {
 	if (!CheckLoad())
 		return E_FAIL;
@@ -81,11 +80,12 @@ int MyCompany::CMyApp::Run(HINSTANCE hInst, const char* lpCmdLine)
 	//m_pParaEngineApp->SetRefreshTimer(1/45.f, 0);
 	m_pParaEngineApp->SetRefreshTimer(1 / 30.f, 0);
 
+	//m_pParaEngineApp->Enable3DRendering(false);
 	// Run to end
 	return m_pParaEngineApp->Run(hInst);
 }
 
-void MyCompany::CMyApp::RegisterNPL_API()
+void ParaEngineApp::RegisterNPL_API()
 {
 	/* example of registering C++ file. In NPL script, call
 	   NPL.activate("MyApp.cpp", {type="SetIcon"});
@@ -117,7 +117,7 @@ void MyCompany::CMyApp::RegisterNPL_API()
 		auto pMainState = pNPLRuntime->GetMainState();
 		if (pMainState)
 		{
-			pMainState->RegisterFile("MyApp.cpp", new CMyAppAPI(m_pParaEngineApp));
+			pMainState->RegisterFile("NplCad_ParaEngineApp.cpp", new CMyAppAPI(m_pParaEngineApp));
 		}
 	}
 }

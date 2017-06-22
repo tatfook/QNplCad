@@ -1,23 +1,5 @@
 #include <QApplication>
-
-#include "PEtypes.h"
-#include "IParaEngineApp.h"
-#include "IParaEngineCore.h"
-#include "INPL.h"
-#include "INPLRuntime.h"
-#include "INPLRuntimeState.h"
-#include "INPLAcitvationFile.h"
-#include "NPLInterface.hpp"
-#include "PluginLoader.hpp"
-
-#include "mainwindow.h"
-
-#include "MyApp.h"
-
-using namespace ParaEngine;
-using namespace NPL;
-using namespace MyCompany;
-
+#include "NplCadWindow.h"
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
@@ -29,9 +11,8 @@ int main(int argc, char *argv[])
     // likely be on by default in a future release of Qt.
     app.setAttribute(Qt::AA_UseHighDpiPixmaps);
 
-	CMyApp myApp;
-	myApp.Run(nullptr,"");
-    MainWindow mainWindow;
-    mainWindow.show();
+	NplCadWindow mainWindow;
+
+	mainWindow.show();
     return app.exec();
 }
