@@ -8,8 +8,6 @@ set(CMAKE_AUTOMOC ON) # For meta object compiler
 set(CMAKE_AUTORCC ON) # Resource files
 set(CMAKE_AUTOUIC ON) # UI files
 
-
-
 set(NPLRUNTIME_ROOT "${CMAKE_SOURCE_DIR}/deps/NPLRuntime")
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 	set(OUTPUT_BIN_DIR "${NPLRUNTIME_ROOT}/ParaWorld/bin64")
@@ -21,8 +19,12 @@ endif()
 
 set (CMAKE_PREFIX_PATH ${QT_ROOT})
 
-# Find the QtWidgets library
-find_package(Qt5Widgets)
+# Qt library
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
+# OpenGL & GLEW library
+find_package(OpenGL REQUIRED)
+# Boost library
 find_package(Boost 1.61 REQUIRED) 
 
 include_directories("${Boost_INCLUDE_DIRS}")
@@ -34,18 +36,13 @@ file (GLOB Main_FILES "${PROJECT_SOURCE_DIR}/src/*.*")
 SOURCE_GROUP("src" FILES ${Main_FILES})
 list(APPEND QNplCad_SOURCE_FILES ${Main_FILES})
 
-
-
 # Tell CMake to create the QNplCad executable
-add_executable(QNplCad WIN32  ${QNplCad_SOURCE_FILES})
-
+add_executable(QNplCad  ${QNplCad_SOURCE_FILES})
+qt5_use_modules(QNplCad Widgets OpenGL)
+target_link_libraries(QNplCad ${QT_LIBRARIES} ${OPENGL_LIBRARIES})
 
 set_target_properties(QNplCad PROPERTIES OUTPUT_NAME "QNplCad")
 set_target_properties(QNplCad PROPERTIES DEBUG_OUTPUT_NAME "QNplCad_d")
-
-# Use the Widgets module from Qt 5.
-target_link_libraries(QNplCad Qt5::Widgets)
-
 
 ADD_CUSTOM_COMMAND(
 	TARGET QNplCad
@@ -55,6 +52,7 @@ ADD_CUSTOM_COMMAND(
 	COMMAND ${CMAKE_COMMAND} -E copy "${QT_ROOT}/bin/Qt5Cored.dll" "${OUTPUT_BIN_DIR}/Qt5Cored.dll"
 	COMMAND ${CMAKE_COMMAND} -E copy "${QT_ROOT}/bin/Qt5Widgetsd.dll" "${OUTPUT_BIN_DIR}/Qt5Widgetsd.dll"
 	COMMAND ${CMAKE_COMMAND} -E copy "${QT_ROOT}/bin/Qt5Guid.dll" "${OUTPUT_BIN_DIR}/Qt5Guid.dll"
+	COMMAND ${CMAKE_COMMAND} -E copy "${QT_ROOT}/bin/Qt5OpenGLd.dll" "${OUTPUT_BIN_DIR}/Qt5OpenGLd.dll"
 )
 
 

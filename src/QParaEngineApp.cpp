@@ -1,39 +1,20 @@
-//-----------------------------------------------------------------------------
-// Class:	ParaEngineApp 
-// Authors:	LiXizhi
-// Emails:	LiXizhi@yeah.net
-// Company: ParaEngine Co.
-// Date:	2015.5.12
-// Desc: This exe must be run in the working directory of ParaEngineClient.dll
-//-----------------------------------------------------------------------------
-#include "PEtypes.h"
-#include "IParaEngineApp.h"
-#include "IParaEngineCore.h"
-#include "INPL.h"
-#include "INPLRuntime.h"
-#include "INPLRuntimeState.h"
-#include "INPLAcitvationFile.h"
-#include "NPLInterface.hpp"
-#include "PluginLoader.hpp"
-
-#include "ParaEngineApp.h"
-
+#include "QParaEngineApp.h"
 using namespace ParaEngine;
 using namespace NPL;
 
-ParaEngineApp::ParaEngineApp(HINSTANCE hInst /*= NULL*/) : m_pParaEngine(NULL), m_pParaEngineApp(NULL), m_hInst(hInst)
+QParaEngineApp::QParaEngineApp() : m_pParaEngine(NULL), m_pParaEngineApp(NULL)
 {
 
 }
 
-ParaEngineApp::~ParaEngineApp()
+QParaEngineApp::~QParaEngineApp()
 {
 	if (m_pParaEngineApp){
 		m_pParaEngineApp->StopApp();
 	}
 }
 
-bool ParaEngineApp::CheckLoad()
+bool QParaEngineApp::CheckLoad()
 {
 	if (m_ParaEngine_plugin.IsValid())
 	{
@@ -62,7 +43,7 @@ bool ParaEngineApp::CheckLoad()
 	return m_ParaEngine_plugin.IsValid();
 }
 
-int ParaEngineApp::Run(HINSTANCE hInst, const char* lpCmdLine)
+int QParaEngineApp::Run(const char* lpCmdLine)
 {
 	if (!CheckLoad())
 		return E_FAIL;
@@ -75,17 +56,10 @@ int ParaEngineApp::Run(HINSTANCE hInst, const char* lpCmdLine)
 		return E_FAIL;
 
 	RegisterNPL_API();
-
-	// Set Frame Rate
-	//m_pParaEngineApp->SetRefreshTimer(1/45.f, 0);
-	m_pParaEngineApp->SetRefreshTimer(1 / 30.f, 0);
-
-	//m_pParaEngineApp->Enable3DRendering(false);
-	// Run to end
-	return m_pParaEngineApp->Run(hInst);
+	return 0;
 }
 
-void ParaEngineApp::RegisterNPL_API()
+void QParaEngineApp::RegisterNPL_API()
 {
 	/* example of registering C++ file. In NPL script, call
 	   NPL.activate("MyApp.cpp", {type="SetIcon"});
@@ -96,7 +70,7 @@ void ParaEngineApp::RegisterNPL_API()
 		CMyAppAPI(IParaEngineApp* pApp) :m_pApp(pApp){}
 		virtual NPLReturnCode OnActivate(INPLRuntimeState* pState)
 		{
-			auto msg = NPLInterface::NPLHelper::MsgStringToNPLTable(pState->GetCurrentMsg(), pState->GetCurrentMsgLength());
+			auto msg = NPLInterface::NPLHelper::MsgStringToNPLTable(pState->GetCurrentMsg());
 			std::string sType = msg["type"];
 			if (sType == "SetIcon")
 			{
@@ -122,4 +96,10 @@ void ParaEngineApp::RegisterNPL_API()
 	}
 }
 
+void QParaEngineApp::Test()
+{
+	auto pNPLRuntime = m_pParaEngineApp->GetNPLRuntime();
+	auto pMainState = pNPLRuntime->GetMainState();
+	pMainState->activate("NplCad_ParaEngineApp.cpp", "{type = 'hello world'}");
+}
 
