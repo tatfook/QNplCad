@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="res/">
+    <file>images/file-new.png</file>
+    <file>images/file-open.png</file>
+    <file>images/file-save.png</file>
+    <file>images/file-save-all.png</file>
+    <file>images/transform-mode-local.png</file>
+  </qresource>
+</RCC>

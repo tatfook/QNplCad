@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include <QMainWindow>
 #include "ui_nplcadwindow.h"
-#include "CadGLView.h"
-#include "FilesView.h"
-#include "LogView.h"
+#include "controls/FilesView.h"
+#include "controls/LogView.h"
 #include "QParaEngineApp.h"
+#include "renderer/GLView.h"
 class NplCadWindow : public QMainWindow {
 	Q_OBJECT
 
@@ -15,11 +15,13 @@ public:
 private:
 	Ui::NplCadWindow ui;
 
-	CadGLView* mCadGLView;
-	FilesView* mFilesView;
-	LogView* mLogView;
+	GLView* m_GLView;
+	FilesView* m_FilesView;
+	LogView* m_LogView;
 
 	QParaEngineApp mQParaEngineApp;
+
+	bool load_stl(const QString& filename, bool is_reload = false);
 private slots:
 	void newFile();
 };

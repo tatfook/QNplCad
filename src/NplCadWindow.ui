@@ -134,7 +134,7 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset resource="../qnplcad.qrc">
+    <iconset resource="../res/qnplcad.qrc">
      <normaloff>:/res/images/file-new.png</normaloff>:/res/images/file-new.png</iconset>
    </property>
    <property name="text">
@@ -143,7 +143,7 @@
   </action>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="../qnplcad.qrc">
+    <iconset resource="../res/qnplcad.qrc">
      <normaloff>:/res/images/file-open.png</normaloff>:/res/images/file-open.png</iconset>
    </property>
    <property name="text">
@@ -152,7 +152,7 @@
   </action>
   <action name="actionBuild">
    <property name="icon">
-    <iconset resource="../qnplcad.qrc">
+    <iconset resource="../res/qnplcad.qrc">
      <normaloff>:/res/images/transform-mode-local.png</normaloff>:/res/images/transform-mode-local.png</iconset>
    </property>
    <property name="text">
@@ -166,7 +166,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../qnplcad.qrc">
+    <iconset resource="../res/qnplcad.qrc">
      <normaloff>:/res/images/file-save.png</normaloff>:/res/images/file-save.png</iconset>
    </property>
    <property name="text">
@@ -180,7 +180,7 @@
   </action>
   <action name="actionSave_All">
    <property name="icon">
-    <iconset resource="../qnplcad.qrc">
+    <iconset resource="../res/qnplcad.qrc">
      <normaloff>:/res/images/file-save-all.png</normaloff>:/res/images/file-save-all.png</iconset>
    </property>
    <property name="text">
@@ -199,7 +199,7 @@
   </action>
  </widget>
  <resources>
-  <include location="../qnplcad.qrc"/>
+  <include location="../res/qnplcad.qrc"/>
  </resources>
  <connections/>
 </ui>
