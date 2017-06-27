@@ -1,120 +1,103 @@
- #include "Camera.h"
- Camera::Camera(enum CameraType camtype) :
- 	type(camtype), projection(Camera::PERSPECTIVE), fov(22.5), viewall(false)
- {
+#include "Camera.h"
+#include <QMatrix4x4>
+#include <QMatrix3x3>
 
- 	// gimbal cam values
- 	object_trans = QVector3D(0, 0, 0);
- 	object_rot = QVector3D(35, 0, 25);
- 	viewer_distance = 500;
+Camera::Camera(float fieldOfView, float aspectRatio, float nearPlane, float farPlane)
+	: m_type(Camera::Type::PERSPECTIVE)
+	, m_eye(QVector3D(0.0f, 0.0f, 0.0f))
+	, m_up(QVector3D(0.0f, 0.0f, 1.0f))
+	, m_lookat(QVector3D(0.0f, 1.0f, 0.0f))
+	, m_pitch(0.0f)
+	, m_yaw(0.0f)
+	, m_roll(0.0f)
+	, m_fieldOfView(fieldOfView)
+	, m_aspectRatio(aspectRatio)
+	, m_nearPlane(nearPlane)
+	, m_farPlane(farPlane)
+	, m_viewer_distance(140)
+{
 
- 	// vector cam values
- 	center = QVector3D(0, 0, 0);
-	QVector3D cameradir(1, 1, -0.5);
- 	eye = center - 500 * cameradir;
+}
 
- 	//pixel_width = RenderSettings::inst()->img_width;
- 	//pixel_height = RenderSettings::inst()->img_height;
- 	autocenter = false;
- }
+float Camera::getFieldOfView() const
+{
+	return m_fieldOfView;
+}
 
- void Camera::setup(std::vector<double> params)
- {
- 	if (params.size() == 7) {
- 		type = Camera::GIMBAL;
- 		object_trans = QVector3D(params[0], params[1], params[2]);
- 		object_rot = QVector3D(params[3], params[4], params[5]);
- 		viewer_distance = params[6];
- 	}
- 	else if (params.size() == 6) {
- 		type = Camera::VECTOR;
- 		eye = QVector3D(params[0], params[1], params[2]);
- 		center = QVector3D(params[3], params[4], params[5]);
- 	}
- 	else {
-		Q_ASSERT("Gimbal cam needs 7 numbers, Vector camera needs 6");
- 	}
- }
+void Camera::setFieldOfView(float v)
+{
+	m_fieldOfView = v;
+}
 
- void Camera::gimbalDefaultTranslate()
- {	// match the GUI viewport numbers (historical reasons)
- 	object_trans[0] *= -1;
- 	object_trans[1] *= -1;
- 	object_trans[2] *= -1;
- 	object_rot[0] = fmodf(360 - object_rot.x() + 90, 360);
- 	object_rot[1] = fmodf(360 - object_rot.y(), 360);
- 	object_rot[2] = fmodf(360 - object_rot.z(), 360);
- }
+float Camera::getAspectRatio() const
+{
+	return m_aspectRatio;
+}
 
- /*!
- Moves camera so that the given bbox is fully visible.
- */
- //void Camera::viewAll(const BoundingBox &bbox)
- //{
- //	if (this->type == Camera::NONE) {
- //		this->type = Camera::VECTOR;
- //		this->center = bbox.center();
- //		this->eye = this->center - Vector3d(1, 1, -0.5);
- //	}
+void Camera::setAspectRatio(float v)
+{
+	m_aspectRatio = v;
+}
 
- //	if (this->autocenter) {
- //		// autocenter = point camera at the center of the bounding box.
- //		if (this->type == Camera::GIMBAL) {
- //			this->object_trans = -bbox.center(); // for Gimbal cam
- //		}
- //		else if (this->type == Camera::VECTOR) {
- //			Vector3d dir = this->center - this->eye;
- //			this->center = bbox.center(); // for Vector cam
- //			this->eye = this->center - dir;
- //		}
- //	}
+float Camera::getNearPlane() const
+{
+	return m_nearPlane;
+}
 
- //	double bboxRadius = bbox.diagonal().norm() / 2;
- //	double radius = (bbox.center() - this->center).norm() + bboxRadius;
- //	double distance = radius / sin(this->fov / 2 * M_PI / 180);
- //	switch (this->type) {
- //	case Camera::GIMBAL:
- //		this->viewer_distance = distance;
- //		break;
- //	case Camera::VECTOR: {
- //		Vector3d cameradir = (this->center - this->eye).normalized();
- //		this->eye = this->center - distance*cameradir;
- //		break;
- //	}
- //	default:
- //		assert(false && "Camera type not specified");
- //	}
- //}
+void Camera::setNearPlane(float v)
+{
+	m_nearPlane = v;
+}
 
- void Camera::zoom(int delta)
- {
- 	this->viewer_distance *= pow(0.9, delta / 120.0);
- }
+float Camera::getFarPlane() const
+{
+	return m_farPlane;
+}
 
- void Camera::setProjection(ProjectionType type)
- {
- 	this->projection = type;
- }
+void Camera::setFarPlane(float v)
+{
+	m_farPlane = v;
+}
 
- void Camera::resetView()
- {
- 	type = Camera::GIMBAL;
- 	object_rot  = QVector3D(35, 0, -25);
- 	object_trans = QVector3D(0, 0, 0);
- 	viewer_distance = 140;
- }
+void Camera::zoom(int delta)
+{
+	m_viewer_distance *= pow(0.9, delta / 120.0);
+}
 
- double Camera::zoomValue()
- {
- 	return viewer_distance;
- }
+double Camera::zoomValue()
+{
+	return m_viewer_distance;
+}
 
- std::string Camera::statusText()
- {
- 	/*boost::format fmt(_("Viewport: translate = [ %.2f %.2f %.2f ], rotate = [ %.2f %.2f %.2f ], distance = %.2f"));
- 	fmt % object_trans.x() % object_trans.y() % object_trans.z()
- 		% object_rot.x() % object_rot.y() % object_rot.z()
- 		% viewer_distance;
- 	return fmt.str();*/
- 	return "";
- }
+void Camera::rotate(float pitch, float yaw, float roll)
+{
+	m_pitch = pitch;
+	m_yaw = yaw;
+	m_roll = roll;
+}
+
+void Camera::translate(const QVector3D &vLocal)
+{
+	m_translation = vLocal;
+}
+
+QMatrix4x4 Camera::projectionMatrix() const
+{
+	QMatrix4x4 m;
+	m.perspective(m_fieldOfView, m_aspectRatio, m_viewer_distance * m_nearPlane, m_viewer_distance * m_farPlane);
+	return m;
+}
+
+QMatrix4x4 Camera::viewMatrix() const
+{
+	QMatrix4x4 m;
+
+	QMatrix4x4 rot_x;		rot_x.rotate(m_pitch, QVector3D(1, 0, 0));
+	QMatrix4x4 rot_y;		rot_y.rotate(m_yaw, QVector3D(0, 1, 0));
+	QMatrix4x4 rot_z;		rot_z.rotate(m_roll, QVector3D(0, 0, 1));
+	QMatrix4x4 camera_rot = rot_x * rot_y * rot_z;
+	QVector3D world_up = camera_rot * m_up;
+	QVector3D world_lookat = camera_rot * m_lookat;
+	QVector3D world_eye = camera_rot * m_eye;
+	return m;
+}

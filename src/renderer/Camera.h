@@ -1,65 +1,45 @@
- #pragma once
-
- /*
-
- Camera
-
- For usage, see QGLView.cc, GLView.cc, export_png.cc, openscad.cc
-
- There are two different types of cameras represented in this class:
-
- *Gimbal camera - uses Euler Angles, object translation, and viewer distance
- *Vector camera - uses 'eye', 'center', and 'up' vectors ('lookat' style)
-
- They are not necessarily kept in sync. There are two modes of
- projection, Perspective and Orthogonal.
-
- */
-
- #include <vector>
+#pragma once
+#include <QMatrix4x4>
 #include <QVector3D>
-
+#include <QQuaternion>
  class Camera
  {
  public:
- 	enum CameraType { NONE, GIMBAL, VECTOR } type;
- 	enum ProjectionType { ORTHOGONAL, PERSPECTIVE } projection;
- 	Camera(enum CameraType camtype = NONE);
- 	void setup(std::vector<double> params);
- 	void gimbalDefaultTranslate();
- 	void setProjection(ProjectionType type);
- 	void zoom(int delta);
- 	double zoomValue();
- 	void resetView();
- 	//void viewAll(const BoundingBox &bbox);
- 	std::string statusText();
+	 enum Type
+	 {
+		 PERSPECTIVE = 1,
+		 ORTHOGRAPHIC = 2
+	 };
+	Camera(float fieldOfView, float aspectRatio, float nearPlane, float farPlane);
 
- 	// Vectorcam
-	QVector3D eye;
-	QVector3D center; // (aka 'target')
-	QVector3D up; // not used currently
+	float getFieldOfView() const;
+	void setFieldOfView(float v);
+	float getAspectRatio() const;
+	void setAspectRatio(float v);
+	float getNearPlane() const;
+	void setNearPlane(float v);
+	float getFarPlane() const;
+	void setFarPlane(float v);
+	void zoom(int delta);
+	double zoomValue();
 
- 						// Gimbalcam
-	QVector3D object_trans;
-	QVector3D object_rot;
-
+	void rotate(float pitch, float yaw, float roll);
+	void translate(const QVector3D &vLocal);
+	QMatrix4x4 projectionMatrix() const;
+	QMatrix4x4 viewMatrix() const;
+ private:
+	 Camera::Type m_type;
+	 QVector3D m_eye;
+	 QVector3D m_up;
+	 QVector3D m_lookat;
+	 float m_pitch;
+	 float m_yaw;
+	 float m_roll;
+	 QVector3D m_translation;
+	 float m_fieldOfView;
+	 float m_aspectRatio;
+	 float m_nearPlane;
+	 float m_farPlane;
  	// Perspective settings
- 	double fov; // Field of view
-
- 				// true if camera should try to view everything in a given
- 				// bounding box.
- 	bool viewall;
-
- 	// true if camera should point at center of bounding box
- 	// (normally it points at 0,0,0 or at given coordinates)
- 	bool autocenter;
-
- 	unsigned int pixel_width;
- 	unsigned int pixel_height;
-
- protected:
- 	// Perspective settings
- 	double viewer_distance;
- 	// Orthographic settings
- 	double height; // world-space height of viewport
+ 	double m_viewer_distance;
  };

@@ -25,15 +25,14 @@ NplCadWindow::~NplCadWindow() {
 bool NplCadWindow::load_stl(const QString& filename, bool is_reload /*= false*/)
 {
 
-	m_GLView->set_status("Loading " + filename);
 
 	Loader* loader = new Loader(this, filename, is_reload);
-	connect(loader, &Loader::got_mesh,
-		m_GLView, &GLView::load_mesh);
-	connect(loader, &Loader::finished,
-		loader, &Loader::deleteLater);
-	connect(loader, &Loader::finished,
-		m_GLView, &GLView::clear_status);
+	//connect(loader, &Loader::got_mesh,
+	//	m_GLView, &GLView::load_mesh);
+	//connect(loader, &Loader::finished,
+	//	loader, &Loader::deleteLater);
+	//connect(loader, &Loader::finished,
+	//	m_GLView, &GLView::clear_status);
 	loader->start();
 	return true;
 }
