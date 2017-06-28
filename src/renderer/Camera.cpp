@@ -1,12 +1,14 @@
 #include "Camera.h"
+#include <QVector3D>
+#include <QVector4D>
 #include <QMatrix4x4>
 #include <QMatrix3x3>
 
-Camera::Camera(float fieldOfView, float aspectRatio, float nearPlane, float farPlane)
+Camera::Camera(QVector3D eye, QVector3D lookat, QVector3D up, float fieldOfView, float aspectRatio, float nearPlane, float farPlane)
 	: m_type(Camera::Type::PERSPECTIVE)
-	, m_eye(QVector3D(0.0f, 0.0f, 0.0f))
-	, m_up(QVector3D(0.0f, 0.0f, 1.0f))
-	, m_lookat(QVector3D(0.0f, 1.0f, 0.0f))
+	, m_eye(eye)
+	, m_lookat(lookat)
+	, m_up(up)
 	, m_pitch(0.0f)
 	, m_yaw(0.0f)
 	, m_roll(0.0f)
@@ -14,7 +16,7 @@ Camera::Camera(float fieldOfView, float aspectRatio, float nearPlane, float farP
 	, m_aspectRatio(aspectRatio)
 	, m_nearPlane(nearPlane)
 	, m_farPlane(farPlane)
-	, m_viewer_distance(140)
+	, m_viewer_distance(1)
 {
 
 }
@@ -62,6 +64,7 @@ void Camera::setFarPlane(float v)
 void Camera::zoom(int delta)
 {
 	m_viewer_distance *= pow(0.9, delta / 120.0);
+	printf("m_viewer_distance:%f\n", m_viewer_distance);
 }
 
 double Camera::zoomValue()
@@ -81,23 +84,43 @@ void Camera::translate(const QVector3D &vLocal)
 	m_translation = vLocal;
 }
 
-QMatrix4x4 Camera::projectionMatrix() const
+QMatrix4x4 Camera::projectionMatrix()
 {
 	QMatrix4x4 m;
 	m.perspective(m_fieldOfView, m_aspectRatio, m_viewer_distance * m_nearPlane, m_viewer_distance * m_farPlane);
 	return m;
 }
 
-QMatrix4x4 Camera::viewMatrix() const
+QMatrix4x4 Camera::viewMatrix()
 {
+	//Understanding the View Matrix:https://www.3dgep.com/understanding-the-view-matrix/#The_View_Matrix
 	QMatrix4x4 m;
 
 	QMatrix4x4 rot_x;		rot_x.rotate(m_pitch, QVector3D(1, 0, 0));
 	QMatrix4x4 rot_y;		rot_y.rotate(m_yaw, QVector3D(0, 1, 0));
 	QMatrix4x4 rot_z;		rot_z.rotate(m_roll, QVector3D(0, 0, 1));
 	QMatrix4x4 camera_rot = rot_x * rot_y * rot_z;
+	QVector3D world_trans = camera_rot * m_translation;
 	QVector3D world_up = camera_rot * m_up;
-	QVector3D world_lookat = camera_rot * m_lookat;
-	QVector3D world_eye = camera_rot * m_eye;
-	return m;
+	QVector3D world_eye = m_eye + world_trans;
+	QVector3D world_lookat = camera_rot * m_lookat + world_eye;
+
+	return LookAtRH(world_eye,world_lookat,world_up);
+}
+
+QMatrix4x4 Camera::LookAtRH(const QVector3D& eye, const QVector3D& target, const QVector3D& up)
+{
+	QVector3D zaxis = (eye - target).normalized();    // The "forward" vector.
+	QVector3D xaxis = (QVector3D::crossProduct(up, zaxis)).normalized();// The "right" vector.
+	QVector3D yaxis = QVector3D::crossProduct(zaxis, xaxis);     // The "up" vector.
+
+	// Create a 4x4 view matrix from the right, up, forward and eye position vectors
+	QMatrix4x4 viewMatrix(
+		xaxis.x(),            yaxis.x(),            zaxis.x(),       0,
+		xaxis.y(),            yaxis.y(),            zaxis.y(),       0,
+		xaxis.z(),            yaxis.z(),            zaxis.z(),       0,
+		-QVector3D::dotProduct(xaxis, eye), -QVector3D::dotProduct(yaxis, eye), -QVector3D::dotProduct(zaxis, eye),  1
+	);
+
+	return viewMatrix;
 }

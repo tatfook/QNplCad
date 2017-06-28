@@ -8,7 +8,7 @@
 #include <QMatrix4x4>
 #include <QColor>
 #include "Camera.h"
-
+#include "GLMesh.h"
 class GLView : public QGLWidget, protected QGLFunctions
 {
     Q_OBJECT
@@ -16,8 +16,10 @@ class GLView : public QGLWidget, protected QGLFunctions
 public:
     GLView(const QGLFormat& format, QWidget* parent=0);
 
-    void initializeGL();
     ~GLView();
+	void initializeGL();
+public slots:
+	void loadMesh(Mesh* m);
 
 protected:
     void mousePressEvent(QMouseEvent* event);
@@ -32,6 +34,12 @@ public:
 	float getDPI() { return 1.0f; }
 private:
 	Camera* m_camera;
+	GLMesh* m_mesh;
+
+	bool mouse_drag_active;
+	QPoint last_mouse;
+	QVector3D object_rot;
+	QVector3D object_trans;
 private:
 	void showCrosshairs();
 	void showAxes(const QColor &col);

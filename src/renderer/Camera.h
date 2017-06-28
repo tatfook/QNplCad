@@ -10,7 +10,7 @@
 		 PERSPECTIVE = 1,
 		 ORTHOGRAPHIC = 2
 	 };
-	Camera(float fieldOfView, float aspectRatio, float nearPlane, float farPlane);
+	Camera(QVector3D eye, QVector3D lookat, QVector3D up, float fieldOfView, float aspectRatio, float nearPlane, float farPlane);
 
 	float getFieldOfView() const;
 	void setFieldOfView(float v);
@@ -25,8 +25,11 @@
 
 	void rotate(float pitch, float yaw, float roll);
 	void translate(const QVector3D &vLocal);
-	QMatrix4x4 projectionMatrix() const;
-	QMatrix4x4 viewMatrix() const;
+	QMatrix4x4 projectionMatrix();
+	QMatrix4x4 viewMatrix();
+
+	// look-at, right-handed coordinate system.
+	QMatrix4x4 LookAtRH(const QVector3D& eye, const QVector3D& target, const QVector3D& up);
  private:
 	 Camera::Type m_type;
 	 QVector3D m_eye;

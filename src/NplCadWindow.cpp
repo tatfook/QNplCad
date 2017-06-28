@@ -27,8 +27,8 @@ bool NplCadWindow::load_stl(const QString& filename, bool is_reload /*= false*/)
 
 
 	Loader* loader = new Loader(this, filename, is_reload);
-	//connect(loader, &Loader::got_mesh,
-	//	m_GLView, &GLView::load_mesh);
+	connect(loader, &Loader::got_mesh,
+		m_GLView, &GLView::loadMesh);
 	//connect(loader, &Loader::finished,
 	//	loader, &Loader::deleteLater);
 	//connect(loader, &Loader::finished,
