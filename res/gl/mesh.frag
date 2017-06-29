@@ -10,8 +10,8 @@ void main() {
     vec3 base00 = vec3(0.40, 0.48, 0.51);
 
     vec3 ec_normal = normalize(cross(dFdx(ec_pos), dFdy(ec_pos)));
-    ec_normal.z *= zoom;
-    ec_normal = normalize(ec_normal);
+    //ec_normal.z *= zoom;
+    //ec_normal = normalize(ec_normal);
 
     float a = dot(ec_normal, vec3(0.0, 0.0, 1.0));
     float b = dot(ec_normal, vec3(-0.57, -0.57, 0.57));

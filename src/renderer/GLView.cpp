@@ -16,17 +16,7 @@
 GLView::GLView(const QGLFormat& format, QWidget *parent)
     : QGLWidget(format, parent)
 {
-	QVector3D eye(0,0,0);
-	QVector3D lookat(0,1,0);
-	QVector3D up(0, 0, 1);
-	m_camera = new Camera(eye, lookat, up, 30, 1.75, 0.1f, 1500.0f);
-
-	object_trans.setX(0);
-	object_trans.setY(-500);
-	object_trans.setZ(50);
-
-	m_camera->translate(object_trans);
-	m_camera->rotate(30, 0, 0);
+	m_camera = new Camera();
 }
 
 GLView::~GLView()
@@ -62,18 +52,29 @@ void GLView::paintGL()
 
 	if (m_mesh)
 	{
-		//update
-		m_camera->rotate(object_rot.x(), object_rot.y(), object_rot.z());
-		m_camera->translate(object_trans);
+		double dist = m_camera->zoomValue();
+		QMatrix4x4 proj;
+		proj.perspective(m_camera->fov, aspectratio, 0.1*dist, 100 * dist);
+
+		QMatrix4x4 view;
+		QVector3D eye(0.0, -dist, 0.0);
+		QVector3D center(0.0, 0.0, 0.0);
+		QVector3D up(0.0, 0.0, 1.0);
+		view.lookAt(eye, center, up);
+
+		QMatrix4x4 rot_x;		rot_x.rotate(m_camera->object_rot.x(), QVector3D(1.0, 0.0, 0.0));
+		QMatrix4x4 rot_y;		rot_y.rotate(m_camera->object_rot.y(), QVector3D(0.0, 1.0, 0.0));
+		QMatrix4x4 rot_z;		rot_z.rotate(m_camera->object_rot.z(), QVector3D(0.0, 0.0, 1.0));
+
+
+		QMatrix4x4 trans;		trans.translate(m_camera->object_trans);
+
+		QMatrix4x4 mvp = proj * trans * rot_x * rot_y * rot_z * view;
 
 		//bind
 		mesh_shader.bind();
-		
-		QMatrix4x4 projection_matrix = m_camera->projectionMatrix();
-		QMatrix4x4 view_matrix = m_camera->viewMatrix();
 
-		glUniformMatrix4fv(mesh_shader.uniformLocation("projection_matrix"), 1, GL_FALSE, projection_matrix.data());
-		glUniformMatrix4fv(mesh_shader.uniformLocation("view_matrix"), 1, GL_FALSE, view_matrix.data());
+		glUniformMatrix4fv(mesh_shader.uniformLocation("mvp"), 1, GL_FALSE, mvp.data());
 
 		// Find and enable the attribute location for vertex position
 		const GLuint vp = mesh_shader.attributeLocation("vertex_position");
@@ -87,7 +88,6 @@ void GLView::paintGL()
 		mesh_shader.release();
 	}
 }
-
 
 void GLView::mousePressEvent(QMouseEvent* event)
 {
@@ -121,15 +121,15 @@ void GLView::mouseMoveEvent(QMouseEvent* event)
 			) {
 			// Left button rotates in xz, Shift-left rotates in xy
 			// On Mac, Ctrl-Left is handled as right button on other platforms
-			object_rot[0] += dy;
+			m_camera->object_rot[0] += dy;
 			if ((QApplication::keyboardModifiers() & Qt::ShiftModifier) != 0)
-				object_rot[1] += dx;
+				m_camera->object_rot[1] += dx;
 			else
-				object_rot[2] += dx;
+				m_camera->object_rot[2] += dx;
 
-			normalizeAngle(object_rot[0]);
-			normalizeAngle(object_rot[1]);
-			normalizeAngle(object_rot[2]);
+			normalizeAngle(m_camera->object_rot[0]);
+			normalizeAngle(m_camera->object_rot[1]);
+			normalizeAngle(m_camera->object_rot[2]);
 		}
 		else {
 			// Right button pans in the xz plane
@@ -157,9 +157,9 @@ void GLView::mouseMoveEvent(QMouseEvent* event)
 				}
 
 				QMatrix3x3 aax, aay, aaz, tm3;
-				aax = QQuaternion::fromAxisAndAngle(1, 0, 0, -(object_rot.x() / 180) * M_PI).toRotationMatrix();
-				aay = QQuaternion::fromAxisAndAngle(0, 1, 0, -(object_rot.y() / 180) * M_PI).toRotationMatrix();
-				aaz = QQuaternion::fromAxisAndAngle(0, 0, 0, -(object_rot.z() / 180) * M_PI).toRotationMatrix();
+				aax = QQuaternion::fromAxisAndAngle(1, 0, 0, -(m_camera->object_rot.x() / 180) * M_PI).toRotationMatrix();
+				aay = QQuaternion::fromAxisAndAngle(0, 1, 0, -(m_camera->object_rot.y() / 180) * M_PI).toRotationMatrix();
+				aaz = QQuaternion::fromAxisAndAngle(0, 0, 0, -(m_camera->object_rot.z() / 180) * M_PI).toRotationMatrix();
 				tm3.setToIdentity();
 				tm3 = aaz * (aay * (aax * tm3));
 
@@ -174,9 +174,9 @@ void GLView::mouseMoveEvent(QMouseEvent* event)
 					0, 0, 0, 1
 				);
 				tm = tm * vec;
-				object_trans[0] += tm(0, 3);
-				object_trans[1] += tm(1, 3);
-				object_trans[2] += tm(2, 3);
+				m_camera->object_trans[0] += tm(0, 3);
+				m_camera->object_trans[1] += tm(1, 3);
+				m_camera->object_trans[2] += tm(2, 3);
 				}
 			}
 		update();
@@ -197,8 +197,8 @@ void GLView::wheelEvent(QWheelEvent *event)
 void GLView::resizeGL(int width, int height)
 {
 	glViewport(0, 0, width, height);
-	float aspectratio = 1.0*width / height;
-	m_camera->setAspectRatio(aspectratio);
+	aspectratio = 1.0*width / height;
+	
 }
 void GLView::showCrosshairs()
 {

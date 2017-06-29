@@ -38,8 +38,7 @@ private:
 
 	bool mouse_drag_active;
 	QPoint last_mouse;
-	QVector3D object_rot;
-	QVector3D object_trans;
+	double aspectratio;
 private:
 	void showCrosshairs();
 	void showAxes(const QColor &col);
