@@ -4,6 +4,7 @@
 GLMesh::GLMesh(const Mesh* const mesh)
     : vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer)
 {
+	box = mesh->box;
     initializeGLFunctions();
 
     vertices.create();

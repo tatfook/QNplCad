@@ -13,7 +13,7 @@ class BoundingBox;
 	double fov; // field of view
 	QVector3D object_trans;
 	QVector3D object_rot;
-	void viewAll(const BoundingBox &bbox);
+	void viewAll(BoundingBox &bbox);
  private:
 
  	double viewer_distance;

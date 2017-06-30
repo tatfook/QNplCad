@@ -12,6 +12,9 @@ Mesh::Mesh(std::vector<GLfloat> v, std::vector<GLuint> i)
     : vertices(v), indices(i)
 {
     // Nothing to do here
+
+	box.m_min = QVector3D(xmin(), ymin(), zmin());
+	box.m_max = QVector3D(xmax(), ymax(), zmax());
 }
 
 float Mesh::min_(size_t start) const

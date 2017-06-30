@@ -20,7 +20,7 @@ public:
 	void initializeGL();
 public slots:
 	void loadMesh(Mesh* m);
-
+	void viewAll();
 protected:
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
@@ -39,6 +39,9 @@ private:
 	bool mouse_drag_active;
 	QPoint last_mouse;
 	double aspectratio;
+
+	QColor bgcol;
+	QColor axescolor;
 private:
 	void showCrosshairs();
 	void showAxes(const QColor &col);

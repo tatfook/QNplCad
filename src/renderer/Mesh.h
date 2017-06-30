@@ -3,7 +3,7 @@
 
 #include <QString>
 #include <QtOpenGL/QtOpenGL>
-
+#include "BoundingBox.h"
 #include <vector>
 
 class Mesh
@@ -22,6 +22,7 @@ public:
     float zmax() const { return max_(2); }
 
     bool empty() const;
+	BoundingBox box;
 
 private:
     std::vector<GLfloat> vertices;
