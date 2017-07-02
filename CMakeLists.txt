@@ -50,18 +50,27 @@ set(Icon_Resource res/exe/qnplcad.rc)
 #add resources to RCC
 qt5_add_resources(Project_Resources_RCC ${Project_Resources})
 
+# main
 file (GLOB src_files "${PROJECT_SOURCE_DIR}/src/*.*")
 SOURCE_GROUP("src" FILES ${src_files})
 list(APPEND QNplCad_SOURCE_FILES ${src_files})
 
+# controls
 file (GLOB controls_files "${PROJECT_SOURCE_DIR}/src/controls/*.*")
 SOURCE_GROUP("src\\controls" FILES ${controls_files})
 list(APPEND QNplCad_SOURCE_FILES ${controls_files})
 
+# renderer
 file (GLOB renderer_files "${PROJECT_SOURCE_DIR}/src/renderer/*.*")
 SOURCE_GROUP("src\\renderer" FILES ${renderer_files})
 list(APPEND QNplCad_SOURCE_FILES ${renderer_files})
 
+# documents
+file (GLOB documents_files "${PROJECT_SOURCE_DIR}/src/documents/*.*")
+SOURCE_GROUP("src\\documents" FILES ${documents_files})
+list(APPEND QNplCad_SOURCE_FILES ${documents_files})
+
+# shader
 file (GLOB shader_files "${PROJECT_SOURCE_DIR}/res/gl/*.vert")
 SOURCE_GROUP("shader" FILES ${shader_files})
 list(APPEND QNplCad_SOURCE_FILES ${shader_files})

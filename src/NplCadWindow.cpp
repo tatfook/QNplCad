@@ -1,8 +1,13 @@
 ﻿#include "NplCadWindow.h"
 #include "renderer/Loader.h"
-NplCadWindow::NplCadWindow(QWidget * parent) : QMainWindow(parent) {
+#include "documents/DocumentManager.h"
+#include "documents/Document.h"
+NplCadWindow::NplCadWindow(QWidget * parent) 
+	: QMainWindow(parent) 
+	, mDocumentManager(DocumentManager::instance())
+{
 	ui.setupUi(this);
-
+	setCentralWidget(mDocumentManager->widget());
 	//3d view
 	QGLFormat format;
 	m_GLView = new GLView(format,ui.Dock3D);
@@ -16,6 +21,7 @@ NplCadWindow::NplCadWindow(QWidget * parent) : QMainWindow(parent) {
 
 	connect(ui.actionNew, &QAction::triggered, this, &NplCadWindow::newFile);
 	newFile();
+	openFile();
 }
 
 NplCadWindow::~NplCadWindow() {
@@ -25,6 +31,7 @@ NplCadWindow::~NplCadWindow() {
 bool NplCadWindow::load_stl(const QString& filename, bool is_reload /*= false*/)
 {
 
+	
 
 	Loader* loader = new Loader(this, filename, is_reload);
 	connect(loader, &Loader::got_mesh,
@@ -38,6 +45,16 @@ bool NplCadWindow::load_stl(const QString& filename, bool is_reload /*= false*/)
 }
 
 void NplCadWindow::newFile()
+{
+	QString error;
+	Document *document = Document::load("", &error);
+	if (!document) {
+		QMessageBox::critical(this, tr("Error Opening Map"), error);
+		return;
+	}
+	mDocumentManager->addDocument(document);
+}
+void NplCadWindow::openFile()
 {
 	//mQParaEngineApp.Test();
 	load_stl(":res/gl/sphere.stl");
