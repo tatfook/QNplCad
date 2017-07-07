@@ -21,6 +21,7 @@ public:
 	void RegisterNPL_API();
 	int Run(const char* lpCmdLine);
 	void Test();
+	void Update();
 	public:
 	ParaEngine::CPluginLoader m_ParaEngine_plugin;
 	ParaEngine::IParaEngineApp * m_pParaEngineApp;

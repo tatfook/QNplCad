@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <QMainWindow>
+#include <QTimer>
 #include "ui_nplcadwindow.h"
 #include "controls/FilesView.h"
 #include "controls/LogView.h"
@@ -24,7 +25,9 @@ private:
 
 	bool load_stl(const QString& filename, bool is_reload = false);
 	DocumentManager *mDocumentManager;
+	QTimer* mTimer;
 private slots:
 	void newFile();
 	void openFile();
+	void update();
 };

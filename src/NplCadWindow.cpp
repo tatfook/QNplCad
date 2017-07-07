@@ -19,15 +19,22 @@ NplCadWindow::NplCadWindow(QWidget * parent)
 	m_LogView = new LogView(ui.DockLog);
 	ui.DockLog->setWidget(m_LogView);
 
+	mQParaEngineApp.Run("bootstrapper=\"test/main.lua\"");
 	connect(ui.actionNew, &QAction::triggered, this, &NplCadWindow::newFile);
-	newFile();
 	openFile();
+
+	mTimer = new QTimer(this);
+	connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
+	mTimer->start(200);
 }
 
 NplCadWindow::~NplCadWindow() {
-	
+	delete mTimer;
 }
-
+void NplCadWindow::update()
+{
+	mQParaEngineApp.Update();
+}
 bool NplCadWindow::load_stl(const QString& filename, bool is_reload /*= false*/)
 {
 
@@ -53,9 +60,9 @@ void NplCadWindow::newFile()
 		return;
 	}
 	mDocumentManager->addDocument(document);
+	mQParaEngineApp.Test();
 }
 void NplCadWindow::openFile()
 {
-	//mQParaEngineApp.Test();
 	load_stl(":res/gl/sphere.stl");
 }

@@ -61,9 +61,6 @@ int QParaEngineApp::Run(const char* lpCmdLine)
 
 void QParaEngineApp::RegisterNPL_API()
 {
-	/* example of registering C++ file. In NPL script, call
-	   NPL.activate("MyApp.cpp", {type="SetIcon"});
-	*/
 	class CMyAppAPI : public INPLActivationFile
 	{
 	public:
@@ -72,11 +69,9 @@ void QParaEngineApp::RegisterNPL_API()
 		{
 			auto msg = NPLInterface::NPLHelper::MsgStringToNPLTable(pState->GetCurrentMsg());
 			std::string sType = msg["type"];
-			if (sType == "SetIcon")
+			if (sType == "nplcad")
 			{
-				// example of changing application icon. 
-				HICON hIcon = LoadIcon(NULL, IDI_WARNING);
-				SendMessage(m_pApp->GetMainWindow(), WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+				int i = 0;
 			}
 			return NPLReturnCode::NPL_OK;
 		};
@@ -92,6 +87,7 @@ void QParaEngineApp::RegisterNPL_API()
 		if (pMainState)
 		{
 			pMainState->RegisterFile("NplCad_ParaEngineApp.cpp", new CMyAppAPI(m_pParaEngineApp));
+
 		}
 	}
 }
@@ -100,6 +96,12 @@ void QParaEngineApp::Test()
 {
 	auto pNPLRuntime = m_pParaEngineApp->GetNPLRuntime();
 	auto pMainState = pNPLRuntime->GetMainState();
-	pMainState->activate("NplCad_ParaEngineApp.cpp", "{type = 'hello world'}");
+	std::string msg = "msg = { start = true}";
+	pMainState->activate("test/main.lua",msg.c_str());
+}
+
+void QParaEngineApp::Update()
+{
+	m_pParaEngineApp->DoWork();
 }
 
