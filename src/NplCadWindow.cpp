@@ -19,7 +19,7 @@ NplCadWindow::NplCadWindow(QWidget * parent)
 	m_LogView = new LogView(ui.DockLog);
 	ui.DockLog->setWidget(m_LogView);
 
-	mQParaEngineApp.Run("bootstrapper=\"test/main.lua\"");
+	mQParaEngineApp.Run("bootstrapper=\"script/QNplCad/main.lua\"");
 	connect(ui.actionNew, &QAction::triggered, this, &NplCadWindow::newFile);
 	openFile();
 

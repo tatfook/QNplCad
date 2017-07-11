@@ -97,7 +97,7 @@ void QParaEngineApp::Test()
 	auto pNPLRuntime = m_pParaEngineApp->GetNPLRuntime();
 	auto pMainState = pNPLRuntime->GetMainState();
 	std::string msg = "msg = { start = true}";
-	pMainState->activate("test/main.lua",msg.c_str());
+	pMainState->activate("script/QNplCad/main.lua",msg.c_str());
 }
 
 void QParaEngineApp::Update()

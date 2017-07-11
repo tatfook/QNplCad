@@ -10,6 +10,7 @@ set(CMAKE_AUTOUIC ON) # UI files
 
 
 set(DEPS_ROOT "${CMAKE_SOURCE_DIR}/deps")
+set(SCRIPT_ROOT "${CMAKE_SOURCE_DIR}/script")
 
 set(NPLRUNTIME_ROOT "${DEPS_ROOT}/NPLRuntime")
 set(EIGEN_ROOT "${DEPS_ROOT}/Eigen")
@@ -78,6 +79,10 @@ file (GLOB shader_files "${PROJECT_SOURCE_DIR}/res/gl/*.frag")
 SOURCE_GROUP("shader" FILES ${shader_files})
 list(APPEND QNplCad_SOURCE_FILES ${shader_files})
 
+# script
+file (GLOB script_files "${PROJECT_SOURCE_DIR}/script/QNplCad/*.*")
+SOURCE_GROUP("script\\QNplCad" FILES ${script_files})
+list(APPEND QNplCad_SOURCE_FILES ${script_files})
 
 # Tell CMake to create the QNplCad executable
 add_executable(QNplCad  ${Project_Resources_RCC} ${QNplCad_SOURCE_FILES} ${Icon_Resource})
@@ -96,6 +101,7 @@ ADD_CUSTOM_COMMAND(
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Gui> ${OUTPUT_BIN_DIR}
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::Widgets> ${OUTPUT_BIN_DIR}
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt5::OpenGL> ${OUTPUT_BIN_DIR}
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${SCRIPT_ROOT} ${OUTPUT_BIN_DIR}/"script"
 )
 
 
