@@ -1,5 +1,6 @@
 ﻿#include "MovableTabWidget.h"
 #include <QTabBar>
+using namespace QNplCad;
 
 MovableTabWidget::MovableTabWidget(QWidget * parent) : QTabWidget(parent) {
 

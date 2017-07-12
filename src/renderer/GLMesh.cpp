@@ -1,5 +1,6 @@
 #include "GLMesh.h"
 #include "Mesh.h"
+using namespace QNplCad;
 
 GLMesh::GLMesh(const Mesh* const mesh)
     : vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer)

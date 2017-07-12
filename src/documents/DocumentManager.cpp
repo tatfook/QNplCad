@@ -11,6 +11,8 @@
 #include "MovableTabWidget.h"
 #include "FileSystemWatcher.h"
 #include "Document.h"
+using namespace QNplCad;
+
 class FileChangedWarning : public QWidget
 {
 	Q_OBJECT

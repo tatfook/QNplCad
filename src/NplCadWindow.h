@@ -6,28 +6,33 @@
 #include "controls/LogView.h"
 #include "QParaEngineApp.h"
 #include "renderer/GLView.h"
-class DocumentManager;
-class NplCadWindow : public QMainWindow {
-	Q_OBJECT
+#include "NPLInterface.hpp"
+namespace QNplCad
+{
+	class DocumentManager;
+	class NplCadWindow : public QMainWindow {
+		Q_OBJECT
 
-public:
-	NplCadWindow(QWidget * parent = Q_NULLPTR);
-	~NplCadWindow();
+	public:
+		NplCadWindow(QWidget * parent = Q_NULLPTR);
+		~NplCadWindow();
 
-private:
-	Ui::NplCadWindow ui;
+	private:
+		Ui::NplCadWindow ui;
 
-	GLView* m_GLView;
-	FilesView* m_FilesView;
-	LogView* m_LogView;
+		GLView* m_GLView;
+		FilesView* m_FilesView;
+		LogView* m_LogView;
 
-	QParaEngineApp mQParaEngineApp;
+		QParaEngineApp mQParaEngineApp;
 
-	bool load_stl(const QString& filename, bool is_reload = false);
-	DocumentManager *mDocumentManager;
-	QTimer* mTimer;
-private slots:
-	void newFile();
-	void openFile();
-	void update();
-};
+		bool load_stl(const QString& filename, bool is_reload = false);
+		DocumentManager *mDocumentManager;
+		QTimer* mTimer;
+		private slots:
+		void newFile();
+		void openFile();
+		void update();
+		void onNplMsg(NPLInterface::NPLObjectProxy msg);
+	};
+}

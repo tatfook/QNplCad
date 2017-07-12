@@ -1,4 +1,5 @@
 ﻿#include "FilesView.h"
+using namespace QNplCad;
 
 FilesView::FilesView(QWidget * parent) : QWidget(parent) {
 	QPalette pal = palette();

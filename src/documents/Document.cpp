@@ -1,5 +1,7 @@
 ﻿#include "Document.h"
 #include <QFileInfo>
+using namespace QNplCad;
+
 Document::Document(const QString &fileName) 
 	: mFileName(fileName) 
 {

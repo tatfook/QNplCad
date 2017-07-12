@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QFileSystemWatcher>
 #include <QStringList>
+using namespace QNplCad;
 
 
 FileSystemWatcher::FileSystemWatcher(QObject *parent) :

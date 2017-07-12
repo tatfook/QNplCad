@@ -1,14 +1,22 @@
 #include "QParaEngineApp.h"
+#include "NplCadGlobal.h"
+#include <thread>
+
 using namespace ParaEngine;
 using namespace NPL;
+using namespace QNplCad;
 
-QParaEngineApp::QParaEngineApp() : m_pParaEngine(NULL), m_pParaEngineApp(NULL)
+QParaEngineApp::QParaEngineApp() 
+	: m_pParaEngine(NULL)
+	, m_pParaEngineApp(NULL)
+	, m_is_looping(false)
 {
 
 }
 
 QParaEngineApp::~QParaEngineApp()
 {
+	this->StopLoop();
 	if (m_pParaEngineApp){
 		m_pParaEngineApp->StopApp();
 	}
@@ -59,24 +67,38 @@ int QParaEngineApp::Run(const char* lpCmdLine)
 	return 0;
 }
 
+void QParaEngineApp::StartLoop()
+{
+	m_is_looping = true;
+	auto t = std::thread(&QParaEngineApp::Update, this);
+	t.detach();
+}
+void QParaEngineApp::StopLoop()
+{
+	m_is_looping = false;
+}
 void QParaEngineApp::RegisterNPL_API()
 {
 	class CMyAppAPI : public INPLActivationFile
 	{
 	public:
-		CMyAppAPI(IParaEngineApp* pApp) :m_pApp(pApp){}
+		CMyAppAPI(IParaEngineApp* pApp, QParaEngineApp* qApp) :m_pApp(pApp), m_qApp(qApp){}
 		virtual NPLReturnCode OnActivate(INPLRuntimeState* pState)
 		{
-			auto msg = NPLInterface::NPLHelper::MsgStringToNPLTable(pState->GetCurrentMsg());
-			std::string sType = msg["type"];
-			if (sType == "nplcad")
-			{
-				int i = 0;
-			}
+			NPLInterface::NPLObjectProxy msg = NPLInterface::NPLHelper::MsgStringToNPLTable(pState->GetCurrentMsg());
+			NplCadGlobal::performFunctionInUIThread([=] {
+				if (m_qApp && m_qApp->callback)
+				{
+					
+					m_qApp->callback(msg);
+				}
+			});
+			
 			return NPLReturnCode::NPL_OK;
 		};
 	protected:
 		IParaEngineApp* m_pApp;
+		QParaEngineApp* m_qApp;
 	};
 
 	auto pNPLRuntime = m_pParaEngineApp->GetNPLRuntime();
@@ -86,8 +108,7 @@ void QParaEngineApp::RegisterNPL_API()
 		auto pMainState = pNPLRuntime->GetMainState();
 		if (pMainState)
 		{
-			pMainState->RegisterFile("NplCad_ParaEngineApp.cpp", new CMyAppAPI(m_pParaEngineApp));
-
+			pMainState->RegisterFile("NplCad_ParaEngineApp.cpp", new CMyAppAPI(m_pParaEngineApp,this));
 		}
 	}
 }
@@ -102,6 +123,9 @@ void QParaEngineApp::Test()
 
 void QParaEngineApp::Update()
 {
-	m_pParaEngineApp->DoWork();
+	while (m_is_looping)
+	{
+		m_pParaEngineApp->DoWork();
+	}
 }
 

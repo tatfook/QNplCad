@@ -15,6 +15,8 @@
 #include "Mesh.h"
 #include "BoundingBox.h"
 #include <sstream>  
+using namespace QNplCad;
+
 GLView::GLView(const QGLFormat& format, QWidget *parent)
     : QGLWidget(format, parent)
 	, bgcol(QColor(149, 194, 228, 255))

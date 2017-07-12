@@ -1,4 +1,5 @@
 ﻿#include "LogView.h"
+using namespace QNplCad;
 
 LogView::LogView(QWidget * parent) : QWidget(parent) {
 	QPalette pal = palette();

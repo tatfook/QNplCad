@@ -1,5 +1,6 @@
 #include <QApplication>
 #include "NplCadWindow.h"
+using namespace QNplCad;
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);

@@ -5,6 +5,8 @@
 #include <QMatrix3x3>
 #include <QtMath>
 #include "BoundingBox.h"
+using namespace QNplCad;
+
 Camera::Camera()
 	: fov(22.5)
 	, object_trans(QVector3D(0, 0, 0))

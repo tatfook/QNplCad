@@ -2,6 +2,8 @@
 #include "renderer/Loader.h"
 #include "documents/DocumentManager.h"
 #include "documents/Document.h"
+#include "NplCadGlobal.h"
+using namespace QNplCad;
 NplCadWindow::NplCadWindow(QWidget * parent) 
 	: QMainWindow(parent) 
 	, mDocumentManager(DocumentManager::instance())
@@ -26,15 +28,26 @@ NplCadWindow::NplCadWindow(QWidget * parent)
 	mTimer = new QTimer(this);
 	connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
 	mTimer->start(200);
+	mQParaEngineApp.StartLoop();
+
+	auto f = std::bind(&NplCadWindow::onNplMsg, this, std::placeholders::_1);
+	mQParaEngineApp.callback = f;
 }
 
 NplCadWindow::~NplCadWindow() {
-	delete mTimer;
+	//delete mTimer;
 }
 void NplCadWindow::update()
 {
-	mQParaEngineApp.Update();
+	NplCadGlobal::refresh();
 }
+
+void NplCadWindow::onNplMsg(NPLInterface::NPLObjectProxy msg)
+{
+	std::string type = msg["type"];
+	int i = 0;
+}
+
 bool NplCadWindow::load_stl(const QString& filename, bool is_reload /*= false*/)
 {
 

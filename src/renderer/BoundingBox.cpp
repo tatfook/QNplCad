@@ -1,5 +1,6 @@
 #include "BoundingBox.h"
 #include <cmath>
+using namespace QNplCad;
 
 BoundingBox::BoundingBox(QVector3D min_, QVector3D max_)
 	: m_min(min_)

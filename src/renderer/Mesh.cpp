@@ -7,7 +7,7 @@
 #include "Mesh.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-
+using namespace QNplCad;
 Mesh::Mesh(std::vector<GLfloat> v, std::vector<GLuint> i)
     : vertices(v), indices(i)
 {

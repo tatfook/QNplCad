@@ -1,4 +1,5 @@
 #include "Backdrop.h"
+using namespace QNplCad;
 
 Backdrop::Backdrop()
 {

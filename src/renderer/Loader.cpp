@@ -1,6 +1,7 @@
 #include <future>
 
 #include "Loader.h"
+using namespace QNplCad;
 
 Loader::Loader(QObject* parent, const QString& filename, bool is_reload)
     : QThread(parent), filename(filename), is_reload(is_reload)
