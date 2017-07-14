@@ -12,75 +12,6 @@
 #include "FileSystemWatcher.h"
 #include "Document.h"
 using namespace QNplCad;
-
-class FileChangedWarning : public QWidget
-{
-	Q_OBJECT
-
-public:
-	FileChangedWarning(QWidget *parent = nullptr)
-		: QWidget(parent)
-		, mLabel(new QLabel(this))
-		, mButtons(new QDialogButtonBox(QDialogButtonBox::Yes |
-			QDialogButtonBox::No,
-			Qt::Horizontal,
-			this))
-	{
-		mLabel->setText(tr("File change detected. Discard changes and reload the map?"));
-
-		QHBoxLayout *layout = new QHBoxLayout;
-		layout->addWidget(mLabel);
-		layout->addStretch(1);
-		layout->addWidget(mButtons);
-		setLayout(layout);
-
-		connect(mButtons, SIGNAL(accepted()), SIGNAL(reload()));
-		connect(mButtons, SIGNAL(rejected()), SIGNAL(ignore()));
-	}
-
-signals:
-	void reload();
-	void ignore();
-
-private:
-	QLabel *mLabel;
-	QDialogButtonBox *mButtons;
-};
-class ViewContainer : public QWidget
-{
-	Q_OBJECT
-
-public:
-	ViewContainer(Document *document,
-		QWidget *parent = nullptr)
-		: QWidget(parent)
-		, mWarning(new FileChangedWarning)
-		, mTextEdit(new QTextEdit)
-	{
-		mWarning->setVisible(false);
-
-		QVBoxLayout *layout = new QVBoxLayout(this);
-		layout->setMargin(0);
-		layout->setSpacing(0);
-		layout->addWidget(mTextEdit);
-
-		connect(mWarning, &FileChangedWarning::reload, this, &ViewContainer::reload);
-		connect(mWarning, &FileChangedWarning::ignore, mWarning, &FileChangedWarning::hide);
-	}
-
-
-	void setFileChangedWarningVisible(bool visible)
-	{
-		mWarning->setVisible(visible);
-	}
-
-signals:
-	void reload();
-private:
-
-	FileChangedWarning *mWarning;
-	QTextEdit* mTextEdit;
-};
 DocumentManager *DocumentManager::mInstance;
 DocumentManager *DocumentManager::instance()
 {
@@ -187,19 +118,18 @@ void DocumentManager::addDocument(Document *document)
 	if (!document->fileName().isEmpty())
 		mFileSystemWatcher->addPath(document->fileName());
 
-	ViewContainer *container = new ViewContainer(document, mTabWidget);
 
 	const int documentIndex = mDocuments.size() - 1;
 
-	mTabWidget->addTab(container, document->displayName());
+	mTabWidget->addTab(document, document->displayName());
 	mTabWidget->setTabToolTip(documentIndex, document->fileName());
 	connect(document, SIGNAL(fileNameChanged(QString, QString)),
 		SLOT(fileNameChanged(QString, QString)));
-	connect(document, SIGNAL(modifiedChanged()), SLOT(updateDocumentTab()));
+	connect(document, SIGNAL(textChanged()), SLOT(updateDocumentTab()));
 	connect(document, SIGNAL(saved()), SLOT(documentSaved()));
 
-	connect(container, SIGNAL(reload()), SLOT(reloadRequested()));
-
+	connect(document, SIGNAL(reload()), SLOT(reloadRequested()));
+	//fileNameChanged(document->fileName(),"");
 	switchToDocument(documentIndex);
 }
 
@@ -217,10 +147,8 @@ void DocumentManager::closeDocumentAt(int index)
 	Document *document = mDocuments.at(index);
 	emit documentAboutToClose(document);
 
-	QWidget *mapViewContainer = mTabWidget->widget(index);
 	mDocuments.removeAt(index);
 	mTabWidget->removeTab(index);
-	delete mapViewContainer;
 
 	if (!document->fileName().isEmpty())
 		mFileSystemWatcher->removePath(document->fileName());
@@ -240,11 +168,12 @@ bool DocumentManager::reloadCurrentDocument()
 bool DocumentManager::reloadDocumentAt(int index)
 {
 	Document *oldDocument = mDocuments.at(index);
+	oldDocument->setFileChangedWarningVisible(false);
 
 	QString error;
-	Document *newDocument = Document::load(oldDocument->fileName(),
-		&error);
-	if (!newDocument) {
+	Document *newDocument = new Document();
+	bool result = newDocument->loadFile(oldDocument->fileName(),&error);
+	if (!result) {
 		emit reloadError(tr("%1:\n\n%2").arg(oldDocument->fileName(), error));
 		return false;
 	}
@@ -282,6 +211,10 @@ void DocumentManager::fileNameChanged(const QString &fileName,
 void DocumentManager::updateDocumentTab()
 {
 	Document *document = static_cast<Document*>(sender());
+	if (!document)
+	{
+		return;
+	}
 	const int index = mDocuments.indexOf(document);
 
 	QString tabText = document->displayName();
@@ -299,8 +232,8 @@ void DocumentManager::documentSaved()
 	Q_ASSERT(index != -1);
 
 	QWidget *widget = mTabWidget->widget(index);
-	ViewContainer *container = static_cast<ViewContainer*>(widget);
-	container->setFileChangedWarningVisible(false);
+	Document *doc = static_cast<Document*>(widget);
+	doc->setFileChangedWarningVisible(false);
 }
 
 void DocumentManager::documentTabMoved(int from, int to)
@@ -329,13 +262,13 @@ void DocumentManager::fileChanged(const QString &fileName)
 	}
 
 	QWidget *widget = mTabWidget->widget(index);
-	ViewContainer *container = static_cast<ViewContainer*>(widget);
-	container->setFileChangedWarningVisible(true);
+	Document *doc = static_cast<Document*>(widget);
+	doc->setFileChangedWarningVisible(true);
 }
 
 void DocumentManager::reloadRequested()
 {
-	int index = mTabWidget->indexOf(static_cast<ViewContainer*>(sender()));
+	int index = mTabWidget->indexOf(static_cast<Document*>(sender()));
 	Q_ASSERT(index != -1);
 	reloadDocumentAt(index);
 }

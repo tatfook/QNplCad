@@ -103,7 +103,7 @@ namespace QNplCad
 		public slots:
 		void switchToLeftDocument();
 		void switchToRightDocument();
-		private slots:
+	private slots:
 		void currentIndexChanged();
 		void fileNameChanged(const QString &fileName,
 			const QString &oldFileName);

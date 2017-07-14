@@ -22,6 +22,7 @@ GLView::GLView(const QGLFormat& format, QWidget *parent)
 	, bgcol(QColor(149, 194, 228, 255))
 	, axescolor(QColor(0, 0, 0, 255))
 	, m_camera(new Camera())
+	, m_mesh(nullptr)
 {
 }
 
@@ -59,27 +60,27 @@ void GLView::paintGL()
 	glClearColor(bgcol.redF(), bgcol.greenF(), bgcol.blueF(), 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+	double dist = m_camera->zoomValue();
+	QMatrix4x4 proj;
+	proj.perspective(m_camera->fov, aspectratio, 0.1*dist, 100 * dist);
+
+	QMatrix4x4 view;
+	QVector3D eye(0.0, -dist, 0.0);
+	QVector3D center(0.0, 0.0, 0.0);
+	QVector3D up(0.0, 0.0, 1.0);
+	view.lookAt(eye, center, up);
+
+	QMatrix4x4 rot_x;		rot_x.rotate(m_camera->object_rot.x(), QVector3D(1.0, 0.0, 0.0));
+	QMatrix4x4 rot_y;		rot_y.rotate(m_camera->object_rot.y(), QVector3D(0.0, 1.0, 0.0));
+	QMatrix4x4 rot_z;		rot_z.rotate(m_camera->object_rot.z(), QVector3D(0.0, 0.0, 1.0));
+
+
+	QMatrix4x4 trans;		trans.translate(m_camera->object_trans);
+
+	QMatrix4x4 mvp = proj * view * trans * rot_x * rot_y * rot_z;
+
 	if (m_mesh)
 	{
-		double dist = m_camera->zoomValue();
-		QMatrix4x4 proj;
-		proj.perspective(m_camera->fov, aspectratio, 0.1*dist, 100 * dist);
-
-		QMatrix4x4 view;
-		QVector3D eye(0.0, -dist, 0.0);
-		QVector3D center(0.0, 0.0, 0.0);
-		QVector3D up(0.0, 0.0, 1.0);
-		view.lookAt(eye, center, up);
-
-		QMatrix4x4 rot_x;		rot_x.rotate(m_camera->object_rot.x(), QVector3D(1.0, 0.0, 0.0));
-		QMatrix4x4 rot_y;		rot_y.rotate(m_camera->object_rot.y(), QVector3D(0.0, 1.0, 0.0));
-		QMatrix4x4 rot_z;		rot_z.rotate(m_camera->object_rot.z(), QVector3D(0.0, 0.0, 1.0));
-
-
-		QMatrix4x4 trans;		trans.translate(m_camera->object_trans);
-
-		QMatrix4x4 mvp = proj * view * trans * rot_x * rot_y * rot_z;
-
 		//bind
 		mesh_shader.bind();
 
@@ -88,6 +89,8 @@ void GLView::paintGL()
 		// Find and enable the attribute location for vertex position
 		const GLuint vp = mesh_shader.attributeLocation("vertex_position");
 		glEnableVertexAttribArray(vp);
+
+		
 
 		// Then draw the mesh with that vertex position
 		m_mesh->draw(vp);
@@ -98,10 +101,9 @@ void GLView::paintGL()
 		// Clean up state machine
 		glDisableVertexAttribArray(vp);
 		mesh_shader.release();
-
-		
 		showSmallaxes(axescolor);
 	}
+	
 }
 
 void GLView::mousePressEvent(QMouseEvent* event)
