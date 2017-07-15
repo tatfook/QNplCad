@@ -9,6 +9,7 @@
 #include "NPLInterface.hpp"
 #include "PluginLoader.hpp"
 #include <functional>
+#include <string>
 namespace QNplCad
 {
 	class QParaEngineApp
@@ -28,8 +29,9 @@ namespace QNplCad
 		void StartLoop();
 		// terminate the main loop.
 		void StopLoop();
-		void Test();
 		void Update();
+		// Call npl 
+		void Call(std::string filename, std::string msg);
 	public:
 		ParaEngine::CPluginLoader m_ParaEngine_plugin;
 		ParaEngine::IParaEngineApp * m_pParaEngineApp;

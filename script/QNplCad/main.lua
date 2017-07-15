@@ -1,16 +1,15 @@
 local function activate()
    if(msg) then
         NPL.load("(gl)script/ide/commonlib.lua");
-        if(msg.start)then
-            commonlib.echo("===========================activate");
-            NPL.load("(gl)script/ide/timer.lua");
-
-            local mytimer = commonlib.Timer:new({callbackFunc = function(timer)
-                commonlib.echo("===========================call");
-                NPL.activate("NplCad_ParaEngineApp.cpp", { type = "nplcad", data ="hello world!"})
-            end})
-            -- start the timer after 0 milliseconds, and signal every 1000 millisecond
-            mytimer:Change(0, 10000)
+        commonlib.echo("===========msg");
+        commonlib.echo(msg);
+        if(msg.build and msg.filename)then
+            NPL.load("Mod/NplCadLibrary/services/CSGService.lua");
+            local CSGService = commonlib.gettable("Mod.NplCadLibrary.services.CSGService");
+            local filename = msg.filename;
+            local output = CSGService.build(filename,true)
+            commonlib.echo("========output");
+            commonlib.echo(output);
         end
             
    end

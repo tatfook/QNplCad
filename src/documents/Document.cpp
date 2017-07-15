@@ -3,6 +3,9 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QTextStream>
+#include <QTextDocumentWriter>
+#include <QDir>
+#include <QMessageBox>
 
 using namespace QNplCad;
 
@@ -21,7 +24,10 @@ Document::Document(QWidget* parent)
 	connect(mWarning, &FileChangedWarning::reload, this, &Document::reload);
 	connect(mWarning, &FileChangedWarning::ignore, mWarning, &FileChangedWarning::hide);
 
-	
+	mTextEdit->document()->setModified(false);
+	mTextEdit->document()->clearUndoRedoStacks();
+	connect(mTextEdit, SIGNAL(textChanged()), SIGNAL(textChanged()));
+
 }
 
 Document::~Document() {
@@ -30,11 +36,32 @@ Document::~Document() {
 
 bool Document::save(QString *error /*= nullptr*/)
 {
-	return false;
+	return save(fileName(),error);
 }
 
 bool Document::save(const QString &fileName, QString *error /*= nullptr*/)
 {
+	QFile file(fileName);
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		QTextStream out(&file);
+		out << mTextEdit->toPlainText();
+		file.close();
+
+		mTextEdit->document()->setModified(false);
+		setFileName(fileName);
+		mLastSaved = QFileInfo(fileName).lastModified();
+
+		emit saved();
+
+		return true;
+
+	}
+	else
+	{
+		QMessageBox::critical(this, tr("Could not write to file \"%1\"").arg(QDir::toNativeSeparators(fileName)), *error);
+	}
+
 	return false;
 }
 
@@ -49,8 +76,9 @@ QString Document::displayName() const
 
 bool Document::isModified() const
 {
-	int undo_steps = mTextEdit->document()->availableUndoSteps();
-	return (undo_steps > 0);
+	return mTextEdit->document()->isModified();
+	/*int undo_steps = mTextEdit->document()->availableUndoSteps();
+	return (undo_steps > 0);*/
 }
 
 bool Document::loadFile(const QString &fileName, QString *error)
@@ -67,6 +95,7 @@ bool Document::loadFile(const QString &fileName, QString *error)
 		mTextEdit->append(line);
 	}
 	setFileName(fileName);
+	mTextEdit->document()->setModified(false);
 	mTextEdit->document()->clearUndoRedoStacks();
 	connect(mTextEdit, SIGNAL(textChanged()), SIGNAL(textChanged()));
 	return true;

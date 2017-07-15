@@ -129,7 +129,7 @@ void DocumentManager::addDocument(Document *document)
 	connect(document, SIGNAL(saved()), SLOT(documentSaved()));
 
 	connect(document, SIGNAL(reload()), SLOT(reloadRequested()));
-	//fileNameChanged(document->fileName(),"");
+	watchFile(document->fileName());
 	switchToDocument(documentIndex);
 }
 
@@ -200,11 +200,8 @@ void DocumentManager::currentIndexChanged()
 void DocumentManager::fileNameChanged(const QString &fileName,
 	const QString &oldFileName)
 {
-	if (!fileName.isEmpty())
-		mFileSystemWatcher->addPath(fileName);
-	if (!oldFileName.isEmpty())
-		mFileSystemWatcher->removePath(oldFileName);
-
+	watchFile(fileName);
+	unWatchFile(oldFileName);
 	updateDocumentTab();
 }
 
@@ -234,6 +231,7 @@ void DocumentManager::documentSaved()
 	QWidget *widget = mTabWidget->widget(index);
 	Document *doc = static_cast<Document*>(widget);
 	doc->setFileChangedWarningVisible(false);
+	updateDocumentTab();
 }
 
 void DocumentManager::documentTabMoved(int from, int to)
@@ -272,4 +270,17 @@ void DocumentManager::reloadRequested()
 	Q_ASSERT(index != -1);
 	reloadDocumentAt(index);
 }
+
+void DocumentManager::watchFile(const QString &fileName)
+{
+	if (!fileName.isEmpty())
+		mFileSystemWatcher->addPath(fileName);
+}
+
+void DocumentManager::unWatchFile(const QString &fileName)
+{
+	if (!fileName.isEmpty())
+		mFileSystemWatcher->removePath(fileName);
+}
+
 #include "DocumentManager.moc"

@@ -113,19 +113,26 @@ void QParaEngineApp::RegisterNPL_API()
 	}
 }
 
-void QParaEngineApp::Test()
-{
-	auto pNPLRuntime = m_pParaEngineApp->GetNPLRuntime();
-	auto pMainState = pNPLRuntime->GetMainState();
-	std::string msg = "msg = { start = true}";
-	pMainState->activate("script/QNplCad/main.lua",msg.c_str());
-}
-
 void QParaEngineApp::Update()
 {
 	while (m_is_looping)
 	{
 		m_pParaEngineApp->DoWork();
 	}
+}
+
+void QNplCad::QParaEngineApp::Call(std::string filename, const std::string msg)
+{
+	if (m_pParaEngineApp)
+	{
+		if (filename.empty())
+		{
+			filename = "script/QNplCad/main.lua";
+		}
+		auto pNPLRuntime = m_pParaEngineApp->GetNPLRuntime();
+		auto pMainState = pNPLRuntime->GetMainState();
+		pMainState->activate(filename.c_str(), msg.c_str());
+	}
+	
 }
 

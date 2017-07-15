@@ -100,7 +100,10 @@ namespace QNplCad
 		* Emitted when an error occurred while reloading the map.
 		*/
 		void reloadError(const QString &error);
-		public slots:
+	private:
+		void watchFile(const QString &fileName);
+		void unWatchFile(const QString &fileName);
+	public slots:
 		void switchToLeftDocument();
 		void switchToRightDocument();
 	private slots:

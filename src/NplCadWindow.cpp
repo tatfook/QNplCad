@@ -38,6 +38,7 @@ namespace QNplCad
 		connect(ui.actionClose, &QAction::triggered, this, &NplCadWindow::closeFile);
 		connect(ui.actionClose_All, &QAction::triggered, this, &NplCadWindow::closeAllFiles);
 		connect(ui.actionQuit, &QAction::triggered, this, &NplCadWindow::quit);
+		connect(ui.actionBuild, &QAction::triggered, this, &NplCadWindow::build);
 		// Shortcuts.
 		ui.actionNew->setShortcuts(QKeySequence::New);
 		ui.actionOpen->setShortcuts(QKeySequence::Open);
@@ -50,6 +51,8 @@ namespace QNplCad
 		ui.actionClose->setShortcut(QKeySequence(tr("Ctrl+W")));
 		// Close_All
 		ui.actionQuit->setShortcut(QKeySequence(tr("Ctrl+Q")));
+		// Build
+		ui.actionBuild->setShortcut(QKeySequence(tr("Ctrl+F5")));
 
 		connect(m_documentManager, SIGNAL(currentDocumentChanged(Document*)),
 			SLOT(documentChanged(Document*)));
@@ -85,11 +88,22 @@ namespace QNplCad
 		int i = 0;
 	}
 
+	void NplCadWindow::build()
+	{
+		Document* doc = m_documentManager->currentDocument();
+		if (doc)
+		{
+			QString filename = doc->fileName();
+			QString msg = QString("msg = { build = true, filename = \"%1\"}").arg(filename);
+			m_paraEngineApp.Call("", msg.toStdString());
+		}
+	}
+
 	void NplCadWindow::startParaEngineApp(std::string cmdline)
 	{
 		if (cmdline.empty())
 		{
-			cmdline = "bootstrapper=\"script/QNplCad/main.lua\"";
+			cmdline = "bootstrapper=\"script/QNplCad/main.lua\" loadpackage=\"npl_packages/NplCadLibrary/,;npl_packages/STLExporter/\"";
 		}
 		m_paraEngineApp.Run(cmdline.c_str());
 
@@ -347,7 +361,11 @@ namespace QNplCad
 
 		if (fileName.isEmpty())
 			return false;
-
+		if (m_documentManager->findDocument(fileName) != -1)
+		{
+			QMessageBox::warning(this, tr("Save Error"),tr("This document has been opened.\n""Please change another location to save."),QMessageBox::Ok);
+			return false;
+		}
 		return save(fileName);
 	}
 
@@ -417,6 +435,7 @@ namespace QNplCad
 		ui.actionReload->setEnabled(m_doc);
 		ui.actionClose->setEnabled(m_doc);
 		ui.actionClose_All->setEnabled(m_doc);
+		ui.actionBuild->setEnabled(m_doc);
 
 		updateRecentFiles();
 	}
@@ -430,6 +449,7 @@ namespace QNplCad
 		{
 			connect(m_doc, SIGNAL(fileNameChanged(QString, QString)), SLOT(updateWindowTitle()));
 			connect(m_doc, SIGNAL(textChanged()), SLOT(updateWindowTitle()));
+			connect(m_doc, SIGNAL(saved()), SLOT(updateWindowTitle()));
 		}
 		updateWindowTitle();
 		updateActions();

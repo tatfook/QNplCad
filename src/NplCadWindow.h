@@ -39,6 +39,7 @@ namespace QNplCad
 		void updateWindowTitle();
 		void update();
 		void onNplMsg(NPLInterface::NPLObjectProxy msg);
+		void build();
 	private:
 		void startParaEngineApp(std::string cmdline = "");
 		void setRecentFile(const QString &fileName);
