@@ -9,6 +9,7 @@
 #include "NPLInterface.hpp"
 #include "PluginLoader.hpp"
 #include <functional>
+#include <QJsonObject>
 #include <string>
 namespace QNplCad
 {
@@ -36,7 +37,7 @@ namespace QNplCad
 		ParaEngine::CPluginLoader m_ParaEngine_plugin;
 		ParaEngine::IParaEngineApp * m_pParaEngineApp;
 		ParaEngine::IParaEngineCore * m_pParaEngine;
-		typedef std::function<void(NPLInterface::NPLObjectProxy msg)> NplCallback;
+		typedef std::function<void(const QJsonObject&  msg)> NplCallback;
 		NplCallback callback;
 	private:
 		bool m_is_looping;

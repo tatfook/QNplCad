@@ -7,6 +7,7 @@ namespace QNplCad
 	{
 		std::vector<std::function<void()>> _functionsToPerform;
 		std::mutex _performMutex;
+		QString app_root;
 		void refresh()
 		{
 			if (!_functionsToPerform.empty()) {
@@ -29,5 +30,16 @@ namespace QNplCad
 
 			_performMutex.unlock();
 		}
+
+		const QString& getAppRoot()
+		{
+			return app_root;
+		}
+
+		void setAppRoot(QString s)
+		{
+			app_root = s;
+		}
+
 	}
 }

@@ -1,6 +1,7 @@
 #include "QParaEngineApp.h"
 #include "NplCadGlobal.h"
 #include <thread>
+#include <QJsonDocument>
 
 using namespace ParaEngine;
 using namespace NPL;
@@ -85,12 +86,15 @@ void QParaEngineApp::RegisterNPL_API()
 		CMyAppAPI(IParaEngineApp* pApp, QParaEngineApp* qApp) :m_pApp(pApp), m_qApp(qApp){}
 		virtual NPLReturnCode OnActivate(INPLRuntimeState* pState)
 		{
-			NPLInterface::NPLObjectProxy msg = NPLInterface::NPLHelper::MsgStringToNPLTable(pState->GetCurrentMsg());
+			std::string msg = pState->GetCurrentMsg();
+			QJsonDocument jsonResponse = QJsonDocument::fromJson(QString(msg.c_str()).toUtf8());
+			QJsonObject json_msg = jsonResponse.object();
+			//NPLInterface::NPLObjectProxy npl_msg = NPLInterface::NPLHelper::MsgStringToNPLTable(msg.c_str());
 			NplCadGlobal::performFunctionInUIThread([=] {
 				if (m_qApp && m_qApp->callback)
 				{
 					
-					m_qApp->callback(msg);
+					m_qApp->callback(json_msg);
 				}
 			});
 			

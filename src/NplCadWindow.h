@@ -1,9 +1,11 @@
 ﻿#pragma once
 #include <QMainWindow>
+#include <QJsonObject>
 #include <QTimer>
 #include <QSettings>
+#include <QtOpenGL/QtOpenGL>
+
 #include "ui_nplcadwindow.h"
-#include "controls/FilesView.h"
 #include "controls/LogView.h"
 #include "QParaEngineApp.h"
 #include "renderer/GLView.h"
@@ -38,7 +40,7 @@ namespace QNplCad
 
 		void updateWindowTitle();
 		void update();
-		void onNplMsg(NPLInterface::NPLObjectProxy msg);
+		void onNplMsg(const QJsonObject& msg);
 		void build();
 	private:
 		void startParaEngineApp(std::string cmdline = "");
@@ -53,6 +55,9 @@ namespace QNplCad
 		void addDocument(Document *document);
 		bool confirmSave(Document *document);
 		bool confirmAllSave();
+		void unionJsonArray(std::vector<GLfloat>& output, QJsonArray& input, QMatrix4x4* matrix = nullptr);
+		void unionJsonArrayInit(std::vector<GLuint>& output, QJsonArray& input);
+		void toMatrix(QMatrix4x4& matrix, QJsonArray* input);
 	private:
 		Ui::NplCadWindow ui;
 

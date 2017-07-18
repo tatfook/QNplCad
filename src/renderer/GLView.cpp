@@ -10,7 +10,6 @@
 #include <GL/glu.h>
 
 #include "GLView.h"
-#include "backdrop.h"
 #include "GLMesh.h"
 #include "Mesh.h"
 #include "BoundingBox.h"
@@ -56,9 +55,9 @@ void GLView::paintGL()
 {
 	glDisable(GL_LIGHTING);
 
-	
 	glClearColor(bgcol.redF(), bgcol.greenF(), bgcol.blueF(), 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 
 	double dist = m_camera->zoomValue();
 	QMatrix4x4 proj;
@@ -81,6 +80,7 @@ void GLView::paintGL()
 
 	if (m_mesh)
 	{
+		
 		//bind
 		mesh_shader.bind();
 
@@ -88,19 +88,25 @@ void GLView::paintGL()
 
 		// Find and enable the attribute location for vertex position
 		const GLuint vp = mesh_shader.attributeLocation("vertex_position");
+		const GLuint vn = mesh_shader.attributeLocation("normal");
+		const GLuint vc = mesh_shader.attributeLocation("color");
 		glEnableVertexAttribArray(vp);
+		glEnableVertexAttribArray(vn);
+		glEnableVertexAttribArray(vc);
 
 		
-
-		// Then draw the mesh with that vertex position
-		m_mesh->draw(vp);
-
 		showAxes(axescolor);
 		showScalemarkers(axescolor);
 
-		// Clean up state machine
+
+		m_mesh->draw(vp,vn,vc);
+
 		glDisableVertexAttribArray(vp);
+		glDisableVertexAttribArray(vn);
+		glDisableVertexAttribArray(vc);
 		mesh_shader.release();
+
+		
 		showSmallaxes(axescolor);
 	}
 	
@@ -190,7 +196,7 @@ void GLView::mouseMoveEvent(QMouseEvent* event)
 				m_camera->object_trans[0] += tm(0, 3);
 				m_camera->object_trans[1] += tm(1, 3);
 				m_camera->object_trans[2] += tm(2, 3);
-				printf("object_trans:%f %f %f\n", m_camera->object_trans.x(), m_camera->object_trans.y(), m_camera->object_trans.z());
+				//printf("object_trans:%f %f %f\n", m_camera->object_trans.x(), m_camera->object_trans.y(), m_camera->object_trans.z());
 				}
 			}
 		update();

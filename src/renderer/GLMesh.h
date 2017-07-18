@@ -13,7 +13,7 @@ namespace QNplCad
 	{
 	public:
 		GLMesh(const Mesh* const mesh);
-		void draw(GLuint vp);
+		void draw(GLuint vp, GLuint vn, GLuint vc);
 
 		BoundingBox box;
 	private:

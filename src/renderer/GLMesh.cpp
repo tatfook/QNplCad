@@ -25,12 +25,14 @@ GLMesh::GLMesh(const Mesh* const mesh)
     indices.release();
 }
 
-void GLMesh::draw(GLuint vp)
+void GLMesh::draw(GLuint vp, GLuint vn, GLuint vc)
 {
     vertices.bind();
     indices.bind();
 
-    glVertexAttribPointer(vp, 3, GL_FLOAT, false, 3*sizeof(float), NULL);
+	glVertexAttribPointer(vp, 3, GL_FLOAT, false, 9 * sizeof(float), 0);
+	glVertexAttribPointer(vn, 3, GL_FLOAT, false, 9 * sizeof(float), (GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(vc, 3, GL_FLOAT, false, 9 * sizeof(float), (GLvoid*)(6 * sizeof(GLfloat)));
     glDrawElements(GL_TRIANGLES, indices.size() / sizeof(uint32_t),
                    GL_UNSIGNED_INT, NULL);
 

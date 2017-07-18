@@ -2,8 +2,6 @@
     <qresource prefix="res/gl/">
         <file>mesh.frag</file>
         <file>mesh.vert</file>
-        <file>quad.frag</file>
-        <file>quad.vert</file>
         <file>sphere.stl</file>
     </qresource>
 </RCC>

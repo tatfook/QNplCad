@@ -18,7 +18,6 @@ Camera::Camera()
 void Camera::zoom(int delta)
 {
 	viewer_distance *= pow(0.9, delta / 120.0);
-	printf("viewer_distance:%f\n", viewer_distance);
 }
 
 double Camera::zoomValue()

@@ -1,5 +1,8 @@
 ﻿#include "NplCadWindow.h"
 #include <QFileDialog>
+#include <QVector3D>
+#include <QMatrix4x4>
+
 #include "renderer/Loader.h"
 #include "documents/DocumentManager.h"
 #include "documents/Document.h"
@@ -12,6 +15,8 @@ namespace QNplCad
 		, m_doc(nullptr)
 		, m_settings(nullptr)
 	{
+		NplCadGlobal::setAppRoot(QDir::currentPath());
+
 		ui.setupUi(this);
 		setCentralWidget(m_documentManager->widget());
 		//3d view
@@ -71,6 +76,7 @@ namespace QNplCad
 		// Start paraengine app.
 		startParaEngineApp();
 		updateActions();
+
 	}
 
 	NplCadWindow::~NplCadWindow() {
@@ -82,10 +88,68 @@ namespace QNplCad
 		NplCadGlobal::refresh();
 	}
 
-	void NplCadWindow::onNplMsg(NPLInterface::NPLObjectProxy msg)
+	void NplCadWindow::onNplMsg(const QJsonObject& msg)
 	{
-		std::string type = msg["type"];
-		int i = 0;
+		QString type = msg["type"].toString();
+		QJsonArray test = msg["test"].toArray();
+		if (type == "qnplcad_output")
+		{
+			auto data = msg["data"].toObject();
+			{
+				auto csg_node_values = data["csg_node_values"].toArray();
+				auto log = data["log"].toString();
+				auto successful = data["successful"].toString();
+				for (int i = 0; i< csg_node_values.count(); i++)
+				{
+					auto node = csg_node_values[i].toObject();
+					auto world_matrix = node["world_matrix"].toArray();
+					auto vertices = node["vertices"].toArray();
+					auto indices = node["indices"].toArray();
+					auto normals = node["normals"].toArray();
+					auto colors = node["colors"].toArray();
+					QMatrix4x4 mt;
+					if (!world_matrix.empty())
+					{
+						toMatrix(mt, &world_matrix);
+					}
+					std::vector<GLfloat> vertices_list;		unionJsonArray(vertices_list, vertices, &mt);
+					for (int j = 0; j < vertices.count(); j++)
+					{
+						if (vertices[j].isArray() && normals[j].isArray() && colors[j].isArray())
+						{
+							auto position_node = vertices[j].toArray();
+							auto normal_node = normals[j].toArray();
+							auto color_node = colors[j].toArray();
+
+							auto x = position_node[0].toDouble();
+							auto y = position_node[1].toDouble();
+							auto z = position_node[2].toDouble();
+							QVector3D v(x, y, z);
+							if (!mt.isIdentity())
+							{
+								v = v * mt;
+							}
+							// Position
+							vertices_list.push_back(v.x());
+							vertices_list.push_back(v.y());
+							vertices_list.push_back(v.z());
+							// Normal
+							vertices_list.push_back(normal_node[0].toDouble());
+							vertices_list.push_back(normal_node[1].toDouble());
+							vertices_list.push_back(normal_node[2].toDouble());
+							// Color
+							vertices_list.push_back(color_node[0].toDouble());
+							vertices_list.push_back(color_node[1].toDouble());
+							vertices_list.push_back(color_node[2].toDouble());
+						}
+					}
+					std::vector<GLuint> indices_list;			unionJsonArrayInit(indices_list, indices);
+
+					Mesh* mesh = new Mesh(vertices_list, indices_list);
+					m_glView->loadMesh(mesh);
+				}
+			}
+		}
 	}
 
 	void NplCadWindow::build()
@@ -94,6 +158,7 @@ namespace QNplCad
 		if (doc)
 		{
 			QString filename = doc->fileName();
+			filename = filename.replace(NplCadGlobal::getAppRoot(), "");
 			QString msg = QString("msg = { build = true, filename = \"%1\"}").arg(filename);
 			m_paraEngineApp.Call("", msg.toStdString());
 		}
@@ -113,8 +178,7 @@ namespace QNplCad
 		m_timer->start(200);
 		m_paraEngineApp.StartLoop();
 		// The entrance of message from paraengine.
-		auto f = std::bind(&NplCadWindow::onNplMsg, this, std::placeholders::_1);
-		m_paraEngineApp.callback = f;
+		m_paraEngineApp.callback = std::bind(&NplCadWindow::onNplMsg, this, std::placeholders::_1);
 	}
 
 #pragma region Recent files
@@ -319,6 +383,71 @@ namespace QNplCad
 		}
 
 		return true;
+	}
+
+	void NplCadWindow::unionJsonArray(std::vector<GLfloat>& output, QJsonArray& input, QMatrix4x4* matrix)
+	{
+		for (int i = 0; i< input.count(); i++)
+		{
+			if (input[i].isArray())
+			{
+				auto obj = input[i].toArray();
+				auto x = obj[0].toDouble();
+				auto y = obj[1].toDouble();
+				auto z = obj[2].toDouble();
+				QVector3D v(x, y, z);
+				if (matrix)
+				{
+					v = v * (*matrix);
+				}
+				output.push_back(v.x());
+				output.push_back(v.y());
+				output.push_back(v.z());
+			}
+			
+		}
+	}
+
+	void NplCadWindow::unionJsonArrayInit(std::vector<GLuint>& output, QJsonArray& input)
+	{
+		for (int i = 0; i < input.count(); i++)
+		{
+			output.push_back(input[i].toInt() - 1);
+		}
+	}
+
+	void NplCadWindow::toMatrix(QMatrix4x4& output, QJsonArray* input)
+	{
+		if (input)
+		{
+			auto m11 = input->at(0).toDouble();
+			auto m12 = input->at(1).toDouble();
+			auto m13 = input->at(2).toDouble();
+			auto m14 = input->at(3).toDouble();
+
+			auto m21 = input->at(4).toDouble();
+			auto m22 = input->at(5).toDouble();
+			auto m23 = input->at(6).toDouble();
+			auto m24 = input->at(7).toDouble();
+
+			auto m31 = input->at(8).toDouble();
+			auto m32 = input->at(9).toDouble();
+			auto m33 = input->at(10).toDouble();
+			auto m34 = input->at(11).toDouble();
+
+			auto m41 = input->at(12).toDouble();
+			auto m42 = input->at(13).toDouble();
+			auto m43 = input->at(14).toDouble();
+			auto m44 = input->at(15).toDouble();
+
+			QMatrix4x4 matrix(
+				m11, m12, m13, m14,
+				m21, m22, m23, m24,
+				m31, m32, m33, m34,
+				m41, m42, m43, m44
+			);
+			output = matrix;
+		}
 	}
 
 	void NplCadWindow::updateWindowTitle()
