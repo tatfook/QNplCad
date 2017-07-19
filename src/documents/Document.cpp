@@ -6,13 +6,14 @@
 #include <QTextDocumentWriter>
 #include <QDir>
 #include <QMessageBox>
-
+#include "LuaHighlighter.h"
 using namespace QNplCad;
 
 Document::Document(QWidget* parent)
 	: QWidget(parent) 
 	, mWarning(new FileChangedWarning)
 	, mTextEdit(new QTextEdit)
+	, mLuaHighlighter(new LuaHighlighter(this))
 {
 	mWarning->setVisible(false);
 
@@ -28,10 +29,13 @@ Document::Document(QWidget* parent)
 	mTextEdit->document()->clearUndoRedoStacks();
 	connect(mTextEdit, SIGNAL(textChanged()), SIGNAL(textChanged()));
 
+	mLuaHighlighter->setDocument(mTextEdit->document());
 }
 
 Document::~Document() {
-	
+	delete mWarning;
+	delete mTextEdit;
+	delete mLuaHighlighter;
 }
 
 bool Document::save(QString *error /*= nullptr*/)
@@ -77,8 +81,6 @@ QString Document::displayName() const
 bool Document::isModified() const
 {
 	return mTextEdit->document()->isModified();
-	/*int undo_steps = mTextEdit->document()->availableUndoSteps();
-	return (undo_steps > 0);*/
 }
 
 bool Document::loadFile(const QString &fileName, QString *error)
@@ -95,7 +97,6 @@ bool Document::loadFile(const QString &fileName, QString *error)
 		mTextEdit->append(line);
 	}
 	setFileName(fileName);
-	mTextEdit->document()->setModified(false);
 	mTextEdit->document()->clearUndoRedoStacks();
 	connect(mTextEdit, SIGNAL(textChanged()), SIGNAL(textChanged()));
 	return true;

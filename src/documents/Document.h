@@ -9,7 +9,7 @@
 #include <QTextEdit>
 namespace QNplCad
 {
-
+	class LuaHighlighter;
 	class FileChangedWarning : public QWidget
 	{
 		Q_OBJECT
@@ -68,5 +68,6 @@ namespace QNplCad
 		QDateTime mLastSaved;
 		FileChangedWarning *mWarning;
 		QTextEdit* mTextEdit;
+		LuaHighlighter* mLuaHighlighter;
 	};
 }

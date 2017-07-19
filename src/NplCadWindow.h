@@ -70,7 +70,6 @@ namespace QNplCad
 		QAction* m_recentFiles[MaxRecentFiles];
 		Document* m_doc;
 
-		bool load_stl(const QString& filename, bool is_reload = false);
 		DocumentManager *m_documentManager;
 		QTimer* m_timer;
 		

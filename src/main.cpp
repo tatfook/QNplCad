@@ -13,7 +13,6 @@ int main(int argc, char *argv[])
     app.setAttribute(Qt::AA_UseHighDpiPixmaps);
 
 	NplCadWindow mainWindow;
-
-	mainWindow.show();
+	mainWindow.showMaximized();
     return app.exec();
 }

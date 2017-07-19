@@ -78,11 +78,15 @@ void GLView::paintGL()
 
 	QMatrix4x4 mvp = proj * view * trans * rot_x * rot_y * rot_z;
 
+	
 	if (m_mesh)
 	{
 		
 		//bind
 		mesh_shader.bind();
+
+		showAxes(axescolor);
+		showScalemarkers(axescolor);
 
 		glUniformMatrix4fv(mesh_shader.uniformLocation("mvp"), 1, GL_FALSE, mvp.data());
 
@@ -95,8 +99,7 @@ void GLView::paintGL()
 		glEnableVertexAttribArray(vc);
 
 		
-		showAxes(axescolor);
-		showScalemarkers(axescolor);
+		
 
 
 		m_mesh->draw(vp,vn,vc);
@@ -105,11 +108,10 @@ void GLView::paintGL()
 		glDisableVertexAttribArray(vn);
 		glDisableVertexAttribArray(vc);
 		mesh_shader.release();
-
 		
 		showSmallaxes(axescolor);
 	}
-	
+	update();
 }
 
 void GLView::mousePressEvent(QMouseEvent* event)

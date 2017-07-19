@@ -98,7 +98,13 @@ namespace QNplCad
 			{
 				auto csg_node_values = data["csg_node_values"].toArray();
 				auto log = data["log"].toString();
-				auto successful = data["successful"].toString();
+				auto successful = data["successful"].toBool();
+				auto compile_error = data["compile_error"].toString();
+				m_logView->append(log);
+				if (!successful)
+				{
+					m_logView->append(compile_error);
+				}
 				for (int i = 0; i< csg_node_values.count(); i++)
 				{
 					auto node = csg_node_values[i].toObject();
@@ -112,7 +118,7 @@ namespace QNplCad
 					{
 						toMatrix(mt, &world_matrix);
 					}
-					std::vector<GLfloat> vertices_list;		unionJsonArray(vertices_list, vertices, &mt);
+					std::vector<GLfloat> vertices_list;
 					for (int j = 0; j < vertices.count(); j++)
 					{
 						if (vertices[j].isArray() && normals[j].isArray() && colors[j].isArray())
@@ -143,7 +149,8 @@ namespace QNplCad
 							vertices_list.push_back(color_node[2].toDouble());
 						}
 					}
-					std::vector<GLuint> indices_list;			unionJsonArrayInit(indices_list, indices);
+					std::vector<GLuint> indices_list;			
+					unionJsonArrayInit(indices_list, indices);
 
 					Mesh* mesh = new Mesh(vertices_list, indices_list);
 					m_glView->loadMesh(mesh);
@@ -236,26 +243,6 @@ namespace QNplCad
 
 	}
 #pragma endregion
-
-	
-
-	bool NplCadWindow::load_stl(const QString& filename, bool is_reload /*= false*/)
-	{
-
-
-
-		Loader* loader = new Loader(this, filename, is_reload);
-		connect(loader, &Loader::got_mesh,
-			m_glView, &GLView::loadMesh);
-		//connect(loader, &Loader::finished,
-		//	loader, &Loader::deleteLater);
-		//connect(loader, &Loader::finished,
-		//	m_glView, &GLView::clear_status);
-		loader->start();
-		return true;
-	}
-
-
 #pragma region slots of files
 	void NplCadWindow::newFile()
 	{
